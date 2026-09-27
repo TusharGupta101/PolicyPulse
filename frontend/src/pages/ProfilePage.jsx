@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { profileService } from '../services/profileService';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -7,14 +7,9 @@ import {
   Save,
   CheckCircle2,
   AlertCircle,
-  Briefcase,
   MapPin,
   HeartHandshake,
-  CreditCard,
-  Building,
-  GraduationCap,
-  ShieldCheck,
-  Percent
+  CreditCard
 } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -45,8 +40,9 @@ export default function ProfilePage() {
       try {
         const data = await profileService.getProfile();
         if (data) {
+          const parsedAge = data.age !== null && data.age !== undefined ? data.age : '';
           setFormData({
-            age: data.age !== null && data.age !== undefined ? data.age : '',
+            age: parsedAge,
             gender: data.gender || 'Male',
             marital_status: data.marital_status || 'Married',
             annual_income: data.annual_income !== null && data.annual_income !== undefined ? data.annual_income : '',
@@ -54,12 +50,12 @@ export default function ProfilePage() {
             land_ownership_acres: data.land_ownership_acres !== null && data.land_ownership_acres !== undefined ? data.land_ownership_acres : '0',
             state: data.state || 'Uttar Pradesh',
             caste_category: data.caste_category || 'General',
-            disability_status: !!data.disability_status,
-            has_ration_card: !!data.has_ration_card,
-            has_bpl_card: !!data.has_bpl_card,
-            is_student: !!data.is_student,
-            is_senior_citizen: !!data.is_senior_citizen,
-            is_minority: !!data.is_minority,
+            disability_status: Boolean(data.disability_status),
+            has_ration_card: Boolean(data.has_ration_card),
+            has_bpl_card: Boolean(data.has_bpl_card),
+            is_student: Boolean(data.is_student),
+            is_senior_citizen: Boolean(data.is_senior_citizen) || (Number(parsedAge) >= 60),
+            is_minority: Boolean(data.is_minority),
           });
         }
       } catch (err) {
@@ -73,10 +69,24 @@ export default function ProfilePage() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+
+    setFormData((prev) => {
+      const updated = {
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value,
+      };
+
+      if (name === 'age') {
+        const numAge = parseInt(value, 10);
+        if (!isNaN(numAge) && numAge >= 60) {
+          updated.is_senior_citizen = true;
+        } else if (!isNaN(numAge) && numAge < 60 && prev.is_senior_citizen) {
+          updated.is_senior_citizen = false;
+        }
+      }
+
+      return updated;
+    });
   };
 
   const calculateCompletion = () => {
@@ -99,11 +109,15 @@ export default function ProfilePage() {
     setSaving(true);
     setMessage({ type: '', text: '' });
 
+    const parsedAge = formData.age === '' ? null : parseInt(formData.age, 10);
+    const parsedIncome = formData.annual_income === '' ? null : parseFloat(formData.annual_income);
+    const parsedLand = parseFloat(formData.land_ownership_acres);
+
     const payload = {
       ...formData,
-      age: formData.age === '' ? null : parseInt(formData.age, 10),
-      annual_income: formData.annual_income === '' ? null : parseFloat(formData.annual_income),
-      land_ownership_acres: parseFloat(formData.land_ownership_acres) || 0.0,
+      age: isNaN(parsedAge) ? null : parsedAge,
+      annual_income: isNaN(parsedIncome) ? null : parsedIncome,
+      land_ownership_acres: isNaN(parsedLand) ? 0.0 : parsedLand,
     };
 
     try {
@@ -153,7 +167,6 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* Top Header Card */}
       <div className="bg-white rounded-2xl border border-[#E5E0D8] p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -161,13 +174,12 @@ export default function ProfilePage() {
               Verified Citizen Profile
             </span>
           </div>
-          <h1 className="text-2xl font-bold text-[#173B32]">Citizen Demographic & Criteria Profile</h1>
+          <h1 className="text-2xl font-bold text-[#173B32]">Citizen Demographic &amp; Criteria Profile</h1>
           <p className="text-xs sm:text-sm text-[#6B7280] mt-1 max-w-xl">
             Keep your profile parameters accurate. The deterministic rule engine evaluates these exact fields to compute your welfare eligibility.
           </p>
         </div>
 
-        {/* Completion Indicator */}
         <div className="bg-[#FAF9F5] p-4 rounded-xl border border-[#E5E0D8] min-w-[200px] text-center">
           <div className="flex items-center justify-between text-xs font-semibold text-[#173B32] mb-1.5">
             <span>Profile Completion</span>
@@ -185,7 +197,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Notifications */}
       {message.text && (
         <div
           className={`p-4 rounded-xl border text-sm flex items-start gap-3 ${
@@ -203,10 +214,7 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        
-        {/* 1. Personal Information */}
         <div className="bg-white rounded-2xl border border-[#E5E0D8] p-6 shadow-sm space-y-4">
           <div className="flex items-center gap-2 pb-3 border-b border-[#E5E0D8]">
             <UserCircle2 className="w-5 h-5 text-[#246B55]" />
@@ -279,11 +287,10 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* 2. Financial Information */}
         <div className="bg-white rounded-2xl border border-[#E5E0D8] p-6 shadow-sm space-y-4">
           <div className="flex items-center gap-2 pb-3 border-b border-[#E5E0D8]">
             <CreditCard className="w-5 h-5 text-[#246B55]" />
-            <h2 className="text-base font-bold text-[#173B32]">2. Financial & Occupation Information</h2>
+            <h2 className="text-base font-bold text-[#173B32]">2. Financial &amp; Occupation Information</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -340,11 +347,10 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* 3. Location Information */}
         <div className="bg-white rounded-2xl border border-[#E5E0D8] p-6 shadow-sm space-y-4">
           <div className="flex items-center gap-2 pb-3 border-b border-[#E5E0D8]">
             <MapPin className="w-5 h-5 text-[#246B55]" />
-            <h2 className="text-base font-bold text-[#173B32]">3. Domicile & Location</h2>
+            <h2 className="text-base font-bold text-[#173B32]">3. Domicile &amp; Location</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -385,11 +391,10 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* 4. Social & Welfare Status Checkboxes */}
         <div className="bg-white rounded-2xl border border-[#E5E0D8] p-6 shadow-sm space-y-4">
           <div className="flex items-center gap-2 pb-3 border-b border-[#E5E0D8]">
             <HeartHandshake className="w-5 h-5 text-[#246B55]" />
-            <h2 className="text-base font-bold text-[#173B32]">4. Social & Special Eligibility Status</h2>
+            <h2 className="text-base font-bold text-[#173B32]">4. Social &amp; Special Eligibility Status</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-1">
@@ -473,7 +478,6 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Submit Bar */}
         <div className="flex items-center justify-end gap-3 pt-2">
           <button
             type="submit"
@@ -484,7 +488,6 @@ export default function ProfilePage() {
             {saving ? 'Saving Profile...' : 'Save & Update Profile'}
           </button>
         </div>
-
       </form>
     </div>
   );
