@@ -25,8 +25,9 @@ def register(
     user_in: UserRegister,
     db: Session = Depends(get_db)
 ):
+    clean_email = user_in.email.strip().lower()
     existing_user = db.query(User).filter(
-        User.email == user_in.email.lower()
+        User.email == clean_email
     ).first()
 
     if existing_user:
@@ -38,9 +39,9 @@ def register(
     hashed_pwd = hash_password(user_in.password)
 
     user = User(
-        email=user_in.email.lower(),
+        email=clean_email,
         hashed_password=hashed_pwd,
-        full_name=user_in.full_name,
+        full_name=user_in.full_name.strip(),
         role="citizen"
     )
 
@@ -67,8 +68,9 @@ def login(
     login_data: UserLogin,
     db: Session = Depends(get_db)
 ):
+    clean_email = login_data.email.strip().lower()
     user = db.query(User).filter(
-        User.email == login_data.email.lower()
+        User.email == clean_email
     ).first()
 
     if not user or not verify_password(

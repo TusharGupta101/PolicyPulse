@@ -15,9 +15,11 @@ export function AuthProvider({ children }) {
           const freshUser = await authService.getMe();
           setUser(freshUser);
         } catch (err) {
-          authService.logout();
-          setUser(null);
-          setToken(null);
+          if (err.response && err.response.status === 401) {
+            authService.logout();
+            setUser(null);
+            setToken(null);
+          }
         }
       }
       setLoading(false);

@@ -17,7 +17,7 @@ export default function RegisterPage() {
     setError('');
     setLoading(true);
     try {
-      await register(fullName, email, password);
+      await register(fullName.trim(), email.trim(), password);
       navigate('/profile');
     } catch (err) {
       if (!err.response) {

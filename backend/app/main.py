@@ -23,6 +23,15 @@ app = FastAPI(
     openapi_url="/openapi.json"
 )
 
+@app.on_event("startup")
+def startup_event():
+    # Ensure seed data (demo account and verified schemes) exists
+    try:
+        from seed.seed_data import run_seed
+        run_seed()
+    except Exception as e:
+        print(f"Seed initialization notice: {e}")
+
 # CORS Configuration
 app.add_middleware(
     CORSMiddleware,
