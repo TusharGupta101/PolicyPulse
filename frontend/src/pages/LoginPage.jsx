@@ -21,9 +21,10 @@ export default function LoginPage() {
     try {
       await login(email.trim(), password);
       navigate(from, { replace: true });
-    } catch (err) {
       if (!err.response) {
         setError('Unable to connect to the PolicyPulse server. Please check your connection and ensure the backend is running.');
+      } else if (err.response.status === 404) {
+        setError('API endpoint not found (404). Please ensure the backend is running and VITE_API_URL is set in environment configuration.');
       } else {
         setError(err.response.data?.detail || 'Invalid email or password.');
       }
