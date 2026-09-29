@@ -1,8 +1,10 @@
 from datetime import datetime
 from typing import Optional, Dict, Any
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class DocumentResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     user_id: int
     original_filename: str
@@ -13,6 +15,3 @@ class DocumentResponse(BaseModel):
     extracted_text: Optional[str] = None
     extracted_metadata: Optional[Dict[str, Any]] = None
     upload_time: datetime
-
-    class Config:
-        from_attributes = True

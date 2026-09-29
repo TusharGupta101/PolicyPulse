@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Settings as SettingsIcon, Shield, Database, Cpu, ExternalLink, Key, ShieldCheck, Scale } from 'lucide-react';
+import { getApiDocsUrl } from '../services/api';
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -118,7 +119,7 @@ export default function SettingsPage() {
             <p className="text-[11px] text-[#6B7280]">FastAPI OpenAPI / Swagger interface for endpoint testing</p>
           </div>
           <a
-            href={`${(import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000').replace(/\/+$/, '')}/docs`}
+            href={getApiDocsUrl()}
             target="_blank"
             rel="noreferrer"
             className="px-4 py-2 bg-[#173B32] hover:bg-[#246B55] text-white text-xs font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-1.5"

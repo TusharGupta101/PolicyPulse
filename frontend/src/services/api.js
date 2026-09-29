@@ -1,14 +1,34 @@
 import axios from 'axios';
 
-const rawApiUrl = (import.meta.env.VITE_API_URL || '').trim();
-let baseURL = '/api';
-if (rawApiUrl) {
+/**
+ * Constructs the canonical backend API base URL.
+ * Automatically respects VITE_API_URL if configured, strips trailing slashes,
+ * and ensures single /api prefix.
+ */
+export function getApiBaseUrl() {
+  const rawApiUrl = (import.meta.env.VITE_API_URL || '').trim();
+  if (!rawApiUrl) {
+    return '/api';
+  }
   const cleanUrl = rawApiUrl.replace(/\/+$/, '');
-  baseURL = cleanUrl.endsWith('/api') ? cleanUrl : `${cleanUrl}/api`;
+  return cleanUrl.endsWith('/api') ? cleanUrl : `${cleanUrl}/api`;
+}
+
+/**
+ * Returns the backend interactive Swagger documentation URL.
+ * Never hardcodes localhost in production builds.
+ */
+export function getApiDocsUrl() {
+  const rawApiUrl = (import.meta.env.VITE_API_URL || '').trim();
+  if (!rawApiUrl) {
+    return import.meta.env.DEV ? 'http://127.0.0.1:8000/docs' : '/docs';
+  }
+  const cleanUrl = rawApiUrl.replace(/\/+$/, '').replace(/\/api$/, '');
+  return `${cleanUrl}/docs`;
 }
 
 const api = axios.create({
-  baseURL,
+  baseURL: getApiBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },

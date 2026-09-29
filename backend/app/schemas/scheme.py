@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Optional, Any
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from app.schemas.rule import RuleResponse
 
 class SchemeBase(BaseModel):
@@ -20,14 +20,12 @@ class SchemeBase(BaseModel):
     is_active: bool = True
 
 class SchemeResponse(SchemeBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
-
 class SchemeDetailResponse(SchemeResponse):
-    rules: List[RuleResponse] = []
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True
+    rules: List[RuleResponse] = []

@@ -1,0 +1,30 @@
+# ==============================================================================
+# Render Blueprint Specification for PolicyPulse Backend
+# ==============================================================================
+# Use "New +" -> "Blueprint" in Render Dashboard, or link this repository.
+# Documentation: https://render.com/docs/blueprint-spec
+# ==============================================================================
+
+services:
+  - type: web
+    name: policypulse-backend
+    runtime: python
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: DATABASE_URL
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: AI_MODE
+        value: deterministic_mock
+      - key: UPLOAD_DIR
+        value: uploads
