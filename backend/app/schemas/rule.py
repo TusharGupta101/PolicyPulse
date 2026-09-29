@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class RuleBase(BaseModel):
     field: str
@@ -11,8 +11,7 @@ class RuleBase(BaseModel):
     is_mandatory: bool = True
 
 class RuleResponse(RuleBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     scheme_id: int
-
-    class Config:
-        from_attributes = True

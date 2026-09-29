@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShieldCheck, ArrowUpRight, Compass, FileCheck2, Send, BookOpen } from 'lucide-react';
+import { getApiDocsUrl } from '../services/api';
 
 export default function Footer() {
   return (
@@ -74,7 +75,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href={`${(import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000').replace(/\/+$/, '')}/docs`}
+                  href={getApiDocsUrl()}
                   target="_blank"
                   rel="noreferrer"
                   className="text-[#A3BFB7] hover:text-white transition-colors inline-flex items-center gap-1"

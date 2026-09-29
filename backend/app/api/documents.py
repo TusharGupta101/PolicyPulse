@@ -29,10 +29,13 @@ async def upload_document(
             detail=f"Unsupported file format '{ext}'. Allowed extensions: {', '.join(settings.ALLOWED_EXTENSIONS)}"
         )
 
-    # Ensure uploads directory exists
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    root_dir = os.path.abspath(os.path.join(current_dir, "..", "..", ".."))
-    upload_folder = os.path.join(root_dir, settings.UPLOAD_DIR)
+    # Ensure uploads directory exists (supports relative paths and absolute persistent disk paths)
+    if os.path.isabs(settings.UPLOAD_DIR):
+        upload_folder = settings.UPLOAD_DIR
+    else:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        root_dir = os.path.abspath(os.path.join(current_dir, "..", "..", ".."))
+        upload_folder = os.path.join(root_dir, settings.UPLOAD_DIR)
     os.makedirs(upload_folder, exist_ok=True)
 
     # Generate unique stored filename

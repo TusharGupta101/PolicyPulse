@@ -10,7 +10,28 @@ def test_health():
     assert res.status_code == 200
     data = res.json()
     assert data["status"] == "healthy"
+    assert data["database"] == "connected"
     assert "project" in data
+
+    # Test root /health endpoint used by Render
+    render_health = client.get("/health")
+    assert render_health.status_code == 200
+    assert render_health.json()["status"] == "healthy"
+
+def test_database_url_normalization():
+    from app.database import normalize_database_url
+    assert normalize_database_url("mysql://root:pass@host:3306/db") == "mysql+pymysql://root:pass@host:3306/db"
+    assert normalize_database_url("mysql2://root:pass@host:3306/db") == "mysql+pymysql://root:pass@host:3306/db"
+    assert normalize_database_url("mysql+pymysql://root:pass@host:3306/db") == "mysql+pymysql://root:pass@host:3306/db"
+    assert normalize_database_url("sqlite:///./test.db") == "sqlite:///./test.db"
+
+def test_cors_configuration():
+    from app.config import settings
+    origins = settings.allowed_origins
+    assert "*" not in origins
+    assert "https://teambroskis.netlify.app" in origins
+    assert "http://localhost:5173" in origins
+
 
 def test_root():
     res = client.get("/")
